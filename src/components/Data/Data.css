@@ -1,0 +1,26 @@
+.titel {
+  background: #ffe800;
+}
+
+.container {
+  background: #ffe800;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 1rem 0;
+}
+
+.titel {
+  border: 1px solid #141414;
+}
+
+.container_Totals {
+  font-weight: bold;
+}
+
+.form {
+  background: #ffe800;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
