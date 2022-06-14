@@ -1,5 +1,7 @@
 import "./Data.css";
 import { useState } from "react";
+import { useFormik } from "formik";
+
 import {
   Heading,
   Badge,
@@ -8,182 +10,248 @@ import {
   GridItem,
   NumberInput,
   NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
   Stack,
   Center,
   Input,
   Container,
   Select,
-  Checkbox,
   Button,
   FormControl,
+  FormLabel,
+  Switch,
+  Box,
 } from "@chakra-ui/react";
 
 /*
-TODO: Hacer que NEW se comporte como un formulario al tocar ADD
-TODO: Hacer que los campos sean requeridos
-TODO: Hacer un toggle con el checkbox para que al estar checked desabilite los inputs de las fechas
-TODO: Achicar las fuentes
-TODO: Extender los inputs hasta el final del container
-TODO: Aplicar logica para crear array con objetos de cada gasto o ingreso
-TODO: Crear componente donde se mostraran los items
+TODO: Extender los inputs hasta el final del container. Quizas con un grid o la propiedad de flexbox que hace que crezcan los elementos
+TODO: Cambiar el formato que me aparece en el DOM a YYYY-MM-DD para que este en ingles o cambiar el outPut para que coincida ambas fechas
+TODO: Crear componente tabla con 5 columnas: date, type, description, category, amount
 */
 
 const Data = () => {
   let today = new Date();
-  let format = `${today.getDate()}/${today.getMonth()}/${today.getFullYear()}`;
+  let year = today.getFullYear();
+  let preMonth = today.getMonth() + 1;
+  let month = preMonth < 10 ? `0${preMonth}` : preMonth;
+  let day = today.getDate();
+  let format = `${year}-${month}-${day}`;
+  // console.log(format);
 
-  const [movement, setMovement] = useState([]);
+  const formik = useFormik({
+    initialValues: {
+      date: "",
+      type: "",
+      description: "",
+      amount: "",
+      category: "",
+    },
+    onSubmit: (values, actions) => {
+      if (values.date == "") {
+        values.date = format;
+      }
+      console.log(JSON.stringify(values, null, 2));
+      actions.resetForm();
+    },
+  });
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    let now = document.querySelector("#now").checked;
+  const [switcherChecked, setSwitcherChecked] = useState(true);
+  const [dateRequired, setDateRequired] = useState("");
 
-    const newMovement = {
-      date: now ? format : e.target.date.value,
-      name: e.target.name.value,
-      category: e.target.category.value,
-      amount: e.target.amount.value,
-    };
-
-    setMovement([...movement, newMovement]);
+  const handelSwitch = (e) => {
+    let isChecked = document.getElementById("switcher").checked;
+    setSwitcherChecked(isChecked);
+    document.getElementById("datePicker").toggleAttribute("disabled");
+    switcherChecked ? setDateRequired("required") : setDateRequired("");
   };
-
-  // console.log(movement);
 
   return (
     <>
-      <Container>
-        <Heading size="md" pb="2" mt="3">
+      <Container mt="4">
+        <Heading
+          size="md"
+          pb="2"
+          mb="2"
+          borderBottom="1px"
+          borderColor="black.200"
+        >
           Balance
         </Heading>
+
+        {/* Balance indicators */}
         <Grid templateColumns="repeat(3, 1fr)">
           <GridItem h="10">
-            <Text fontSize="md" fontWeight="bold">
+            <Text fontSize="sm" fontWeight="bold">
               Income
-              <Badge ml="1" fontSize="0.8em" colorScheme="green">
+              <Badge ml="1" fontSize="sm" colorScheme="green">
                 0
               </Badge>
             </Text>
           </GridItem>
           <GridItem h="10">
-            <Text fontSize="md" fontWeight="bold">
+            <Text fontSize="sm" fontWeight="bold">
               Expenses
-              <Badge ml="1" fontSize="0.8em" colorScheme="red">
+              <Badge ml="1" fontSize="sm" colorScheme="red">
                 0
               </Badge>
             </Text>
           </GridItem>
           <GridItem h="10">
-            <Text fontSize="md" fontWeight="bold">
+            <Text fontSize="sm" fontWeight="bold">
               Available
-              <Badge ml="1" fontSize="0.8em" colorScheme="blue">
+              <Badge ml="1" fontSize="sm" colorScheme="blue">
                 0
               </Badge>
             </Text>
           </GridItem>
         </Grid>
-        <Heading size="md" pb="2">
-          New
+
+        <Heading
+          size="md"
+          pb="2"
+          mb="2"
+          borderBottom="1px"
+          borderColor="black.200"
+        >
+          New entry
         </Heading>
-        <FormControl isRequired>
-          <Select placeholder="Select option" pb="2">
-            <option value="option1">Income</option>
-            <option value="option2">Expense</option>
-          </Select>
-          <Stack shouldWrapChildren direction="row">
-            <Center mb="2">
-              <Text fontSize="md" fontWeight="bold" mr="2">
-                Date
-              </Text>
-              <NumberInput mr="1" size="sm" maxW={20} min={1} max={31}>
-                <NumberInputField placeholder="DD" />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-              <NumberInput mr="1" size="sm" maxW={20} min={1} max={12}>
-                <NumberInputField placeholder="MM" />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-              <NumberInput
-                mr="1"
-                size="sm"
-                maxW={20}
-                min={2000}
-                max={today.getFullYear()}
+        <Center>
+          <form onSubmit={formik.handleSubmit}>
+            {/* input date */}
+            <FormControl isRequired={dateRequired}>
+              <Stack shouldWrapChildren direction="row">
+                <Center mb="2">
+                  <FormLabel fontSize="sm" fontWeight="bold" htmlFor="number">
+                    Date
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    // data-date=""
+                    // data-date-format="YYYY MMMM DD"
+                    // value="2015-08-09"
+                    mr="2"
+                    id="datePicker"
+                    disabled
+                    {...formik.getFieldProps("date")}
+                  ></Input>
+
+                  <Text fontSize="sm">Today</Text>
+                  <Switch
+                    isRequired={""}
+                    id="switcher"
+                    size="lg"
+                    ml="2"
+                    defaultChecked
+                    onChange={handelSwitch}
+                  />
+                </Center>
+              </Stack>
+            </FormControl>
+
+            {/* input select */}
+            <FormControl isRequired>
+              <Stack shouldWrapChildren direction="row" mb="2" bg="blue">
+                <Center>
+                  <FormLabel fontSize="sm" fontWeight="bold" htmlFor="number">
+                    Type
+                  </FormLabel>
+                  <Select
+                    placeholder="Select option"
+                    fontSize="sm"
+                    {...formik.getFieldProps("type")}
+                  >
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                  </Select>
+                </Center>
+              </Stack>
+            </FormControl>
+
+            {/* input description */}
+            <FormControl isRequired>
+              <Stack
+                shouldWrapChildren
+                direction="row"
+                mb="2"
+                bg="tomato"
+                fontSize="xs"
               >
-                <NumberInputField placeholder="YYYY" />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-              <Checkbox defaultChecked>Today</Checkbox>
-            </Center>
-          </Stack>
-          <Stack shouldWrapChildren direction="row" pb="2" fontSize="xs">
-            <Center>
-              <Text fontSize="md" fontWeight="bold" mr="2">
-                Description
-              </Text>
-              <Input placeholder="Rent" />
-            </Center>
-          </Stack>
-          <Stack shouldWrapChildren direction="row" pb="2">
-            <Center>
-              <Text fontSize="md" fontWeight="bold" mt="1" mr="6">
-                Category
-              </Text>
-              <Input placeholder="General by default" />
-            </Center>
-          </Stack>
-          <Stack shouldWrapChildren direction="row" pb="2">
-            <Center>
-              <Text fontSize="md" fontWeight="bold" mt="1" mr="8">
-                Amount
-              </Text>
-              <Input placeholder="1000" />
-            </Center>
-          </Stack>
-          <Button colorScheme="blue">Add</Button>
-        </FormControl>
+                <Center>
+                  <FormLabel
+                    fontSize="sm"
+                    fontWeight="bold"
+                    htmlFor="description"
+                  >
+                    Description
+                  </FormLabel>
+                  <Input
+                    autoComplete="off"
+                    type="text"
+                    placeholder="Rent"
+                    fontSize="sm"
+                    id="description"
+                    name="description"
+                    {...formik.getFieldProps("description")}
+                  />
+                </Center>
+              </Stack>
+            </FormControl>
+
+            {/* input amount */}
+            <FormControl isRequired>
+              <Stack shouldWrapChildren direction="row" mb="2" bg="blue">
+                <Center>
+                  <FormLabel fontSize="sm" fontWeight="bold" htmlFor="amount">
+                    Amount
+                  </FormLabel>
+                  <Input
+                    autoComplete="off"
+                    type="number"
+                    placeholder="1000"
+                    fontSize="sm"
+                    id="amount"
+                    name="amount"
+                    {...formik.getFieldProps("amount")}
+                  />
+                </Center>
+              </Stack>
+            </FormControl>
+
+            {/* input category */}
+            <FormControl>
+              <Stack
+                shouldWrapChildren
+                direction="row"
+                flex="1"
+                mb="2"
+                bg="tomato"
+              >
+                <Center>
+                  <FormLabel fontSize="sm" fontWeight="bold" htmlFor="category">
+                    Category
+                  </FormLabel>
+                  <Box flex="1" bg="tomato">
+                    <Input
+                      autoComplete="off"
+                      type="text"
+                      placeholder="General"
+                      fontSize="sm"
+                      id="category"
+                      name="category"
+                      {...formik.getFieldProps("category")}
+                    />
+                  </Box>
+                </Center>
+              </Stack>
+            </FormControl>
+
+            <Button colorScheme="blue" type="submit">
+              Add
+            </Button>
+          </form>
+        </Center>
       </Container>
     </>
   );
 };
 
 export default Data;
-{
-  /* <div className="movementSection">
-<h2 className="titel">New movement</h2>
-<form className="form" onSubmit={handleAdd}>
-  <div>
-    <label>Date</label>
-    <input type="text" name="date"></input> <label>Now</label>
-    <input type="checkbox" id="now" defaultChecked></input>
-  </div>
-  <div>
-    <label>Name</label>
-    <input type="text" name="name" required></input>
-  </div>
-  <div>
-    <label>Category</label>
-    <input type="text" name="category" required></input>
-  </div>
-  <div>
-    <label>Amount</label>
-    <input type="text" name="amount" required></input>
-  </div>
-  <button id="addMovement" type="onSubmit">
-    Add
-  </button>
-</form>
-</div> */
-}
