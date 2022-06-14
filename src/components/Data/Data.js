@@ -8,8 +8,6 @@ import {
   Text,
   Grid,
   GridItem,
-  NumberInput,
-  NumberInputField,
   Stack,
   Center,
   Input,
@@ -19,12 +17,11 @@ import {
   FormControl,
   FormLabel,
   Switch,
-  Box,
 } from "@chakra-ui/react";
 
 /*
 TODO: Extender los inputs hasta el final del container. Quizas con un grid o la propiedad de flexbox que hace que crezcan los elementos
-TODO: Cambiar el formato que me aparece en el DOM a YYYY-MM-DD para que este en ingles o cambiar el outPut para que coincida ambas fechas
+
 TODO: Crear componente tabla con 5 columnas: date, type, description, category, amount
 */
 
@@ -34,8 +31,7 @@ const Data = () => {
   let preMonth = today.getMonth() + 1;
   let month = preMonth < 10 ? `0${preMonth}` : preMonth;
   let day = today.getDate();
-  let format = `${year}-${month}-${day}`;
-  // console.log(format);
+  let format = `${day}-${month}-${year}`;
 
   const formik = useFormik({
     initialValues: {
@@ -48,7 +44,11 @@ const Data = () => {
     onSubmit: (values, actions) => {
       if (values.date == "") {
         values.date = format;
+      } else {
+        let newFormat = values.date.split("-").reverse().join("-");
+        values.date = newFormat;
       }
+
       console.log(JSON.stringify(values, null, 2));
       actions.resetForm();
     },
@@ -149,7 +149,7 @@ const Data = () => {
 
             {/* input select */}
             <FormControl isRequired>
-              <Stack shouldWrapChildren direction="row" mb="2" bg="blue">
+              <Stack shouldWrapChildren direction="row" mb="2">
                 <Center>
                   <FormLabel fontSize="sm" fontWeight="bold" htmlFor="number">
                     Type
@@ -168,13 +168,7 @@ const Data = () => {
 
             {/* input description */}
             <FormControl isRequired>
-              <Stack
-                shouldWrapChildren
-                direction="row"
-                mb="2"
-                bg="tomato"
-                fontSize="xs"
-              >
+              <Stack shouldWrapChildren direction="row" mb="2" fontSize="xs">
                 <Center>
                   <FormLabel
                     fontSize="sm"
@@ -198,7 +192,7 @@ const Data = () => {
 
             {/* input amount */}
             <FormControl isRequired>
-              <Stack shouldWrapChildren direction="row" mb="2" bg="blue">
+              <Stack shouldWrapChildren direction="row" mb="2">
                 <Center>
                   <FormLabel fontSize="sm" fontWeight="bold" htmlFor="amount">
                     Amount
@@ -218,28 +212,20 @@ const Data = () => {
 
             {/* input category */}
             <FormControl>
-              <Stack
-                shouldWrapChildren
-                direction="row"
-                flex="1"
-                mb="2"
-                bg="tomato"
-              >
+              <Stack shouldWrapChildren direction="row" mb="2">
                 <Center>
                   <FormLabel fontSize="sm" fontWeight="bold" htmlFor="category">
                     Category
                   </FormLabel>
-                  <Box flex="1" bg="tomato">
-                    <Input
-                      autoComplete="off"
-                      type="text"
-                      placeholder="General"
-                      fontSize="sm"
-                      id="category"
-                      name="category"
-                      {...formik.getFieldProps("category")}
-                    />
-                  </Box>
+                  <Input
+                    autoComplete="off"
+                    type="text"
+                    placeholder="General"
+                    fontSize="sm"
+                    id="category"
+                    name="category"
+                    {...formik.getFieldProps("category")}
+                  />
                 </Center>
               </Stack>
             </FormControl>
